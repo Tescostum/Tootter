@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="400" height="400" creationComplete="window1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import local.service.MstdnAuthService;
+			import local.util.MstdnSharedObjectUtil;
+			
+			[Bindable]
+			private var _util:MstdnSharedObjectUtil;
+			
+			protected function window1_creationCompleteHandler(event:FlexEvent):void
+			{
+				_util = new MstdnSharedObjectUtil();
+			}
+			
+			protected function requestTokenButton_clickHandler(event:MouseEvent):void
+			{
+				var service:MstdnAuthService = new MstdnAuthService();
+				var mail:String = mailAddressInput.text;
+				var pass:String = passwordInput.text;
+				if(!mail || !pass) {
+					Alert.show("確認", "アドレスとパスワードを入力してください", Alert.OK, this);
+				}
+				service.requestAccessToken(mail, pass,
+					function():void {
+						status = "Tokenが発行されました。画面を閉じてください";
+					}, function(error:Error):void {
+						status = error.message;
+					}
+				);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	<s:VGroup id="introBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+		<s:Label color="#999999" text="Mail"/>
+		<s:TextInput id="mailAddressInput" width="100%"/>
+		<s:Label color="#999999" text="Pass"/>
+		<s:TextInput id="passwordInput" width="100%" displayAsPassword="true"/>
+		<s:Button id="requestTokenButton" label="認証" click="requestTokenButton_clickHandler(event)"/>
+	</s:VGroup>
+</s:Window>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  title="トゥーッター" showStatusBar="false"
+		  width="400" height="300" xmlns:components="flatspark.components.*" xmlns:myComponents="style.myComponents.*"
+		  initialize="window1_initializeHandler(event)">
+	<s:layout>
+		<s:VerticalLayout gap="8"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import flatspark.enums.BrandColorEnum;
+			import flatspark.enums.ButtonSizeEnum;
+			import flatspark.enums.TextInputSizeEnum;
+			
+			import local.service.MstdnSendService;
+			
+			private var _sharedObject:SharedObject;
+			private var _sendService:MstdnSendService;
+			protected function window1_initializeHandler(event:FlexEvent):void {
+				var so:SharedObject = SharedObject.getLocal("mstdn_sender");
+				if(so.data["clientId"] && so.data["clientSecret"]) {
+					trace(so.data["idStr"]);
+					_sharedObject = so;
+				} else {
+					openAuthorizationWindow();
+				}
+				_sendService = new MstdnSendService();
+			}
+			
+			private function openAuthorizationWindow():void {
+				this.enabled = false;
+				var w:AuthorizeWindow = new AuthorizeWindow();
+				w.addEventListener(Event.CLOSE,
+					function(event:Event):void {
+						enabled = true;
+						var so:SharedObject = SharedObject.getLocal("mstdn_sender");
+						if(so.data["clientId"] && so.data["clientSecret"]) {
+							trace(so.data["idStr"]);
+							_sharedObject = so;
+						}
+					}
+				);
+				w.open(true);
+			}
+			
+			protected function buttonicon1_clickHandler(event:MouseEvent):void
+			{
+				var commentObject:Object = { warning:warningCommentInput.text, message:messageInput.text };
+				if(commentObject.message) sendMessage(commentObject);
+			}
+			
+			private function sendMessage(commentObject:Object):void {
+				statusMessage = "投稿しています...";
+				sendButton.enabled = false;
+				_sendService.sendMessage(commentObject,
+					function():void {
+						statusMessage = "投稿に成功しました";
+						warningCommentInput.text = "";
+						messageInput.text = "";
+						sendButton.enabled = true;
+					}, function(error:Error):void {
+						statusMessage = "投稿に失敗しました";
+						sendButton.enabled = true;
+					}
+				);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fx:String id="statusMessage">入力してください</fx:String>
+	</fx:Declarations>
+	<s:HGroup width="100%" paddingTop="8" paddingLeft="8" paddingRight="8" verticalAlign="middle">
+		<s:TextInput id="warningCommentInput" width="100%" height="{TextInputSizeEnum.Small}"/>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="100%" paddingLeft="8" paddingRight="8" verticalAlign="middle">
+		<myComponents:MyTextArea id="messageInput"  width="100%" height="100%" maxChars="500"/>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingBottom="8" paddingLeft="8" paddingRight="8" verticalAlign="middle" horizontalAlign="right">
+		<s:Label width="100%" color="#999999" text="{statusMessage}"/>
+		<components:ButtonIcon id="sendButton" label="Send" height="{ButtonSizeEnum.Normal}" brand="{BrandColorEnum.Success}" click="buttonicon1_clickHandler(event)"/>
+	</s:HGroup>
+</s:Window>

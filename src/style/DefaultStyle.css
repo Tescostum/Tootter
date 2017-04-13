@@ -1,0 +1,56 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace ns "http://flex.apache.org/experimental/ns";
+@namespace components "flatspark.components.*";
+@namespace components1 "style.components.*";
+@namespace myComponents "style.myComponents.*";
+
+* {
+	fontFamily: "游ゴシック Medium";
+	fontSize: 14;
+}
+
+s|RadioButton {
+	skinClass: ClassReference("flatspark.skins.RadioButtonSkin");
+}
+
+ns|Alert {
+	skinClass: ClassReference("flatspark.skins.AlertSkin")
+}
+
+s|Button {
+	skinClass: ClassReference("flatspark.skins.ButtonSkin");
+}
+
+components|ButtonIcon {
+	skinClass: ClassReference("flatspark.skins.ButtonIconSkin");
+}
+
+s|CheckBox {
+	skinClass: ClassReference("flatspark.skins.CheckBoxSkin");
+}
+
+s|ComboBox {
+	skinClass: ClassReference("flatspark.skins.ComboBoxSkin");
+}
+
+s|DropDownList {
+	skinClass: ClassReference("flatspark.skins.DropDownListSkin");
+}
+
+s|TextInput {
+	skinClass: ClassReference("flatspark.skins.TextInputSkin");
+}
+
+components|TextInputIcon {
+	skinClass: ClassReference("flatspark.skins.TextInputIconSkin");
+}
+
+s|TitleWindow {
+	skinClass: ClassReference("flatspark.skins.TitleWindowSkin");
+}
+
+myComponents|MyTextArea {
+	skinClass: ClassReference("style.mySkins.MyTextAreaSkin");
+}
