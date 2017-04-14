@@ -120,21 +120,17 @@ package local.service
 			var dataEvent:String = "";
 			for (var i:int = 0; i < events.length; i++) {
 				var elm:String = events[i];
-				var splits:Array = elm.split(/\:\s/);
-				var division:String = splits.length >= 2 ? splits[0] : '';
-				if(division == "event") {
-					var dataName:String = splits.length >= 2 ? splits[1] : '';
-					dataEvent = dataName;
-				} else if(division == "data") {
-					var jsonStr:String = ""
-					if(splits.length >= 3) {
-						for (var j:int = 1; j < splits.length; j++) {
-							jsonStr += splits[j] as String;
-						}
-					} else {
-						jsonStr = splits.length >= 2 ? splits[1] : '';
+				var splits:Array = elm.match(/(data|event): (.*)/);
+				if(splits && splits.length >= 3) {
+					var division:String = splits[1] || '';
+					if(division == "event") {
+						var dataName:String = splits[2] || '';
+						dataEvent = dataName;
+					} else if(division == "data") {
+						var jsonStr:String = ""
+						jsonStr = splits[2] || '';
+						execStreamData(dataEvent, jsonStr);
 					}
-					execStreamData(dataEvent, jsonStr);
 				}
 			}
 		}
