@@ -5,6 +5,8 @@ package local.service
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	
+	import mx.utils.StringUtil;
 
 	public class URLRequestService
 	{
@@ -18,10 +20,7 @@ package local.service
 			loader.addEventListener(Event.COMPLETE, function(event:Event):void {
 				trace(event);
 				if(event.currentTarget.data) {
-					var jsonStr:String = event.currentTarget.data as String;
-					var jsonObj:Object = JSON.parse(jsonStr);
-					trace("parse");
-					successFunc(jsonObj);
+					successFunc(event.currentTarget.data);
 				} else {
 					successFunc(null);
 				}

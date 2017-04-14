@@ -9,8 +9,8 @@ package local.service
 	public class MstdnAuthService
 	{
 		private static const CLIENT_NAME:String = "トゥーッター";
-		private static const CLIENT_ID:String = ""/*YOUR_CLIANT_ID*/;
-		private static const CLIENT_SECRET:String = ""/*YOUR_CLIANT_SECRET_KEY*/;
+		private static const CLIENT_ID:String = "ba4297c35e3fbb5020abcb436aa842a69192353fc8621a900219b06e9dee0a2f"/*YOUR_CLIANT_ID*/;
+		private static const CLIENT_SECRET:String = "dabc5b375e0f290db2ac882f3e8b14f673fbdbbafc1ad3cfa39ea4d343ecd611"/*YOUR_CLIANT_SECRET_KEY*/;
 		
 		private static const REDIRECT_URL:String = "urn:ietf:wg:oauth:2.0:oob";
 		private static const APP_REQUEST_URL:String = "https://mstdn.jp/api/v1/apps";
@@ -38,11 +38,15 @@ package local.service
 			
 			var reqService:URLRequestService = new URLRequestService();
 			reqService.loadRequest(req,
-				function(jsonObj:Object):void {
-					if(!jsonObj) {
+				function(data:Object):void {
+					if(!data) {
 						failFunc(new Error("情報が取得できませんでした"));
 						return;
 					}
+					
+					var jsonStr:String = data as String;
+					var jsonObj:Object = JSON.parse(jsonStr);
+					
 					saveTokenData(jsonObj, successFunc, failFunc);
 				}, function(error:Error):void {
 					failFunc(error);
