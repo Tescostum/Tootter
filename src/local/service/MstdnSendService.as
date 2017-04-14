@@ -11,7 +11,7 @@ package local.service
 	{
 		
 		private var _util:MstdnSharedObjectUtil;
-		private var SEND_URL:String = "https://mstdn.jp/api/v1/statuses";
+		private var SEND_URL:String = "/api/v1/statuses";
 		
 		public function MstdnSendService()
 		{
@@ -24,7 +24,7 @@ package local.service
 				return;
 			}
 			
-			var req:URLRequest = new URLRequest(SEND_URL);
+			var req:URLRequest = new URLRequest("https://" + _util.domain + SEND_URL);
 			req.method = URLRequestMethod.POST;
 			
 			req.requestHeaders = [];
@@ -41,14 +41,17 @@ package local.service
 			
 			var reqService:URLRequestService = new URLRequestService();
 			reqService.loadRequest(req,
-				function(jsonData:Object):void {
-					if(!jsonData) {
+				function(data:Object):void {
+					if(!data) {
 						failFunc(new Error("情報が取得できませんでした"));
 						return;
 					}
+					var jsonStr:String = data as String;
+					var jsonObj:Object = JSON.parse(jsonStr);
+					
 					successFunc();
 				}, function(error:Error):void {
-					failFunc();
+					failFunc(error);
 				}
 			);
 		}
