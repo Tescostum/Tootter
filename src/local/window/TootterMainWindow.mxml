@@ -20,31 +20,20 @@
 			
 			private var _sharedObject:SharedObject;
 			private var _sendService:MstdnSendService;
+			
+			private var timelineWindow:PublicTimeLineWindow;
+			private var authorizeWindow:AuthorizeWindow;
+			
 			protected function window1_initializeHandler(event:FlexEvent):void {
 				var so:SharedObject = SharedObject.getLocal("mstdn_sender");
-				if(so.data["clientId"] && so.data["clientSecret"]) {
-					trace(so.data["idStr"]);
+				if(so.data["accessToken"] && so.data["created_at"]) {
+					trace(so.data["created_at"]);
 					_sharedObject = so;
-				} else {
-					openAuthorizationWindow();
 				}
+
+				openTimeline();
+				openAuthorizeWindow();
 				_sendService = new MstdnSendService();
-			}
-			
-			private function openAuthorizationWindow():void {
-				this.enabled = false;
-				var w:AuthorizeWindow = new AuthorizeWindow();
-				w.addEventListener(Event.CLOSE,
-					function(event:Event):void {
-						enabled = true;
-						var so:SharedObject = SharedObject.getLocal("mstdn_sender");
-						if(so.data["clientId"] && so.data["clientSecret"]) {
-							trace(so.data["idStr"]);
-							_sharedObject = so;
-						}
-					}
-				);
-				w.open(true);
 			}
 			
 			protected function buttonicon1_clickHandler(event:MouseEvent):void
@@ -68,11 +57,56 @@
 					}
 				);
 			}
+			
+			
+			protected function openTimelineButton_clickHandler(event:MouseEvent):void
+			{
+				openTimeline();
+			}
+			
+			private function openAuthorizeWindow():void {
+				if(!authorizeWindow) {
+					authorizeWindow = new AuthorizeWindow();
+					authorizeWindow.addEventListener(Event.CLOSE,
+						function(event:Event):void {
+							authorizeWindow = null;
+						}
+					);
+					authorizeWindow.open(true);
+				} else {
+					if(!authorizeWindow.closed) {
+						authorizeWindow.activate();
+					}
+				}
+			}
+			
+			private function openTimeline():void {
+				if(!timelineWindow) {
+					timelineWindow = new PublicTimeLineWindow();
+					timelineWindow.addEventListener(Event.CLOSE,
+						function(event:Event):void {
+							timelineWindow = null;
+						}
+					);
+					timelineWindow.open(true);
+				} else {
+					if(!timelineWindow.closed) {
+						timelineWindow.activate();
+					}
+				}
+			}
 		]]>
 	</fx:Script>
 	<fx:Declarations>
 		<fx:String id="statusMessage">入力してください</fx:String>
 	</fx:Declarations>
+	<s:HGroup width="100%" paddingTop="8" paddingLeft="8" paddingRight="8" verticalAlign="middle">
+		<components:ButtonIcon label="Auth" height="{ButtonSizeEnum.Normal}" brand="{BrandColorEnum.Success}" 
+							   click="openAuthorizeWindow()"/>
+		<components:ButtonIcon label="Timeline" height="{ButtonSizeEnum.Normal}" brand="{BrandColorEnum.Success}" 
+							   click="openTimeline()"/>
+	</s:HGroup>
+	
 	<s:HGroup width="100%" paddingTop="8" paddingLeft="8" paddingRight="8" verticalAlign="middle">
 		<s:TextInput id="warningCommentInput" width="100%" height="{TextInputSizeEnum.Small}"/>
 	</s:HGroup>

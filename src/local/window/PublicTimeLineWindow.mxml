@@ -31,7 +31,6 @@
 				timeLineService.getTimeLine(
 					function():void {
 						changeState("Start");
-						startTimeline();
 					}, function(error:Error):void {
 						changeState("Stop");
 					}
@@ -46,7 +45,7 @@
 	<fx:Declarations>
 	</fx:Declarations>
 	
-	<s:DataGrid width="100%" height="100%" dataProvider="{timeLineService.timeLine}">
+	<s:DataGrid width="100%" height="100%" dataProvider="{timeLineService.timeLine}" variableRowHeight="true">
 		<s:columns>
 			<s:ArrayCollection>
 				<s:GridColumn dataField="accountName"/>
@@ -60,7 +59,7 @@
 										import flashx.textLayout.conversion.TextConverter;
 									]]>
 								</fx:Script>
-								<s:RichText width="100%" height="100%"
+								<s:RichText width="100%" height="100%" paddingTop="4" paddingBottom="4" paddingLeft="4" paddingRight="4"
 											textFlow="{TextConverter.importToFlow((data as MstdnModel).content, TextConverter.TEXT_FIELD_HTML_FORMAT)}"/>
 							</s:GridItemRenderer>
 						</fx:Component>
