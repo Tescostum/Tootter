@@ -87,7 +87,10 @@ package local.service
 			function onProgress(event:ProgressEvent):void {
 				_buffer += _urlStream.readUTFBytes(_urlStream.bytesAvailable);
 				if(_buffer) {
-					parseStreamData(_buffer);
+					if(_buffer.indexOf("\n") >= 0)
+					{
+						parseStreamData(_buffer);
+					}
 				}
 			}
 			
@@ -139,8 +142,13 @@ package local.service
 		private function execStreamData(dataEvent:String, data:String):void {
 			switch(dataEvent) {
 				case "update":
-					var toot:Object = JSON.parse(data);
-					addToot(toot);
+					try {
+						var toot:Object = JSON.parse(data);
+						addToot(toot);
+					} catch(error:Error) {
+						trace(error.message);
+					}
+					
 					break;
 				default:
 					break;
