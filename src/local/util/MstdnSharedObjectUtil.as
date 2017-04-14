@@ -16,6 +16,15 @@ package local.util
 		}
 		
 		[Bindable]
+		public function get domain():String {
+			return _sharedObject.data["domain"] || "";
+		}
+		
+		public function set domain(value:String):void {
+			_sharedObject.data["domain"] = value;
+		}
+		
+		[Bindable]
 		public function get accessToken():String {
 			return _sharedObject.data["accessToken"] || "";
 		}
