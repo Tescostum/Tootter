@@ -1,8 +1,14 @@
 package local.service
 {
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
+	import flash.net.URLStream;
 	import flash.net.URLVariables;
 	
 	import mx.collections.ArrayCollection;
@@ -15,6 +21,11 @@ package local.service
 	{
 		private var _util:MstdnSharedObjectUtil;
 		private var TIMELINE_URL:String = "/api/v1/streaming/public";
+		private var reqService:URLRequestService;
+		
+		private var _urlLoader:URLLoader;
+		private var _urlStream:URLStream;
+		private var _buffer:String;
 		
 		[Bindable]
 		public var timeLine:ArrayCollection;
@@ -23,6 +34,9 @@ package local.service
 		{
 			_util = new MstdnSharedObjectUtil();
 			timeLine = new ArrayCollection();
+			reqService = new URLRequestService();
+			_urlStream = new URLStream();
+			_buffer = "";
 		}
 		
 		public function getTimeLine(successFunc:Function, failFunc:Function):void {
@@ -36,8 +50,7 @@ package local.service
 			req.requestHeaders = [];
 			req.requestHeaders.push(new URLRequestHeader("Authorization", "Bearer "+ String(_util.accessToken)));
 			
-			var reqService:URLRequestService = new URLRequestService();
-			reqService.loadRequest(req,
+			streamLoadRequest(req,
 				function(data:Object):void {
 					if(!data) {
 						failFunc(new Error("情報が取得できませんでした"));
@@ -49,6 +62,52 @@ package local.service
 					failFunc(error);
 				}
 			);
+		}
+		
+		public function streamLoadRequest(request:URLRequest, successFunc:Function, failFunc:Function):void {
+			_urlStream = new URLStream();
+			var loader:URLStream = _urlStream;
+			loader.load(request);
+			loader.addEventListener(Event.COMPLETE, onComplete);
+			loader.addEventListener(ProgressEvent.PROGRESS, onProgress);
+			loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			
+			function onComplete(event:Event):void {
+				trace(event.type);
+				if(event.currentTarget.data) {
+					successFunc(event.currentTarget.data);
+				} else {
+					successFunc(null);
+				}
+				removeLoaderEventListener();
+				loader = null;
+			}
+			
+			function onProgress(event:ProgressEvent):void {
+				_buffer += _urlStream.readUTFBytes(_urlStream.bytesAvailable);
+				if(_buffer) {
+					parseStreamData(_buffer);
+				}
+			}
+			
+			function onIOError(event:IOErrorEvent):void {
+				failFunc(new Error(event.text, event.errorID));
+				removeLoaderEventListener();
+				loader = null;
+			}
+			
+			function onSecurityError(event:SecurityErrorEvent):void {
+				failFunc(new Error(event.toString(), event.errorID));
+				removeLoaderEventListener();
+				loader = null;
+			}
+			
+			function removeLoaderEventListener():void {
+				loader.removeEventListener(Event.COMPLETE, onComplete);
+				loader.removeEventListener(IOErrorEvent.IO_ERROR, onIOError);
+				loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			}
 		}
 		
 		public function parseStreamData(data:String):void {
