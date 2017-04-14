@@ -6,8 +6,6 @@ package local.service
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
-	import mx.utils.StringUtil;
-
 	public class URLRequestService
 	{
 		public function URLRequestService()
@@ -16,9 +14,8 @@ package local.service
 		
 		public function loadRequest(request:URLRequest, successFunc:Function, failFunc:Function):void {
 			var loader:URLLoader = new URLLoader(request);
-			
 			loader.addEventListener(Event.COMPLETE, function(event:Event):void {
-				trace(event);
+				trace(event.type);
 				if(event.currentTarget.data) {
 					successFunc(event.currentTarget.data);
 				} else {
@@ -27,7 +24,7 @@ package local.service
 			});
 			
 			loader.addEventListener(IOErrorEvent.IO_ERROR, function(event:IOErrorEvent):void {
-				failFunc(new Error(event.toString(), event.errorID));
+				failFunc(new Error(event.text, event.errorID));
 			});
 			
 			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, function(event:SecurityErrorEvent):void {

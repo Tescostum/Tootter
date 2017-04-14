@@ -17,10 +17,17 @@
 			protected function window1_creationCompleteHandler(event:FlexEvent):void
 			{
 				_util = new MstdnSharedObjectUtil();
+				loadRegistData();
+			}
+			
+			private function loadRegistData():void {
+				domainInput.text = _util.domain || '';
+				mailAddressInput.text = _util.mailAddress || '';
 			}
 			
 			protected function requestTokenButton_clickHandler(event:MouseEvent):void
 			{
+				saveDomain();
 				var service:MstdnAuthService = new MstdnAuthService();
 				var mail:String = mailAddressInput.text;
 				var pass:String = passwordInput.text;
@@ -30,8 +37,39 @@
 				service.requestAccessToken(mail, pass,
 					function():void {
 						status = "Tokenが発行されました。画面を閉じてください";
+						_util.mailAddress = mailAddressInput.text;
+						_util.save();
 					}, function(error:Error):void {
 						status = error.message;
+					}
+				);
+			}
+			
+			private function saveDomain():void {
+				if(domainInput.text) {
+					var domain:String = _util.getCorrectDomain(domainInput.text + "/");
+					if(!domain || (_util.domain != domain)) {
+						_util.domain = domain;
+						if(_util.clientId && _util.clientSecret) {
+							_util.save();
+							status = "ドメインを保存しました";
+						} else {
+							registerNewClient();
+						}
+						
+					}
+					domainInput.text = domain;
+				}
+			}
+			
+			private function registerNewClient():void {
+				var service:MstdnAuthService = new MstdnAuthService();
+				service.requestClientKey(
+					function():void {
+						_util.save();
+						status = "ドメインを保存しました";
+					}, function(error:Error):void {
+						status = "クライアントの登録に失敗しました";
 					}
 				);
 			}
@@ -40,11 +78,21 @@
 	<fx:Declarations>
 		
 	</fx:Declarations>
-	<s:VGroup id="introBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+	<s:VGroup id="introBox" width="100%" height="100%" horizontalAlign="left" paddingLeft="4" paddingRight="4" verticalAlign="middle">
+		<s:Label color="#999999" text="Domain"/>
+		<s:HGroup width="100%" gap="2" verticalAlign="middle">
+			<s:Label color="#999999" text="https://"/>
+			<s:TextInput id="domainInput" width="100%"/>
+		</s:HGroup>
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button id="saveDomainButton" label="ドメイン登録" click="saveDomain()"/>
+		</s:HGroup>
 		<s:Label color="#999999" text="Mail"/>
 		<s:TextInput id="mailAddressInput" width="100%"/>
 		<s:Label color="#999999" text="Pass"/>
 		<s:TextInput id="passwordInput" width="100%" displayAsPassword="true"/>
-		<s:Button id="requestTokenButton" label="認証" click="requestTokenButton_clickHandler(event)"/>
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button id="requestTokenButton" label="認証" click="requestTokenButton_clickHandler(event)"/>
+		</s:HGroup>
 	</s:VGroup>
 </s:Window>
